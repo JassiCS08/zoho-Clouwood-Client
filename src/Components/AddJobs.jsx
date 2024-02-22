@@ -12,8 +12,8 @@ const AddJobs = () => {
   const [projectRes, setProjectRes] = useState();
   const [selectedProjectID, setSelectedProjectID] = useState(null);
   const [range, setRange] = useState(0);
-  const [rangeFrom, setRangeFrom] = useState(1);
-  const [rangeTo, setRangeTo] = useState(10);
+  const [rangeFrom, setRangeFrom] = useState(0);
+  const [rangeTo, setRangeTo] = useState(0);
   const [multipleJobs, setMultipleJobs] = useState(false);
   const [showLoader, setShowLoader] = useState(false);
 
@@ -73,8 +73,8 @@ const AddJobs = () => {
       }
 
       const apiUrl = multipleJobs
-        ? `https://zoho-clouwood-backend.onrender.com/addjobs?Job_Name=${job}&Project=${project}&ProjectDepartmentIds=${departmentIds}&From=${rangeFrom}&To=${rangeTo}`
-        : `https://zoho-clouwood-backend.onrender.com/addjobs?Job_Name=${job}&Project=${project}&ProjectDepartmentIds=${departmentIds}`;
+        ? `https://zoho-clouwood-client.onrender.com/addjobs?Job_Name=${job}&Project=${project}&ProjectDepartmentIds=${departmentIds}&From=${rangeFrom}&To=${rangeTo}`
+        : `https://zoho-clouwood-client.onrender.com/addjobs?Job_Name=${job}&Project=${project}&ProjectDepartmentIds=${departmentIds}`;
 
       const response = await axios.post(apiUrl, null, {
         headers: {
@@ -86,6 +86,84 @@ const AddJobs = () => {
       console.log(response.data);
       setShowLoader(false);
       toast.success("Job added successfully");
+    } catch (error) {
+      toast.error(`Error: ${error.message}`);
+      setShowLoader(false);
+    }
+  };
+
+  const addJobDirect = async (e) => {
+    e.preventDefault();
+    setShowLoader(true);
+    try {
+      const emptyFields = [];
+      if (!authToken) {
+        emptyFields.push("Auth Token");
+      }
+      if (!job) {
+        emptyFields.push("Job Name");
+      }
+      if (!project) {
+        emptyFields.push("Project");
+      }
+      if (!departmentIds) {
+        emptyFields.push("Department IDs");
+      }
+      if (emptyFields.length > 0) {
+        emptyFields.forEach((field) => {
+          toast.error(`${field} is required`);
+        });
+        return;
+      }
+      if (rangeFrom > rangeTo) {
+        toast.error("'Range From' should be less than or equal to 'Range To'");
+        return;
+      }
+
+      const createJob = async (jobName, project, authToken) => {
+        let data = qs.stringify({
+          inputData: `{"Job_Name": ${jobName},"StartDate":"01-02-2024","EndDate":"31-12-2024","Project":${project},"Assignees":"All","AssigneeHours":"5;5","AssigneeRate":"10;10","departmentIds":${DepartmentIds}}`,
+        });
+
+        let config = {
+          method: "post",
+          maxBodyLength: Infinity,
+          url: "https://people.zoho.in/people/api/forms/json/P_TimesheetJob/insertRecord",
+          headers: {
+            Authorization: `Zoho-oauthtoken ${authToken}`,
+            "Content-Type": "application/x-www-form-urlencoded",
+            Cookie:
+              "1b7c7929a1=55f6120f27055335daa474ce1d568d26; CSRF_TOKEN=ada58632-3e4e-4a66-894f-a78995eb7526; _zcsr_tmp=ada58632-3e4e-4a66-894f-a78995eb7526; _zpsid=2A8753F365ABC31616FA84EED5072556",
+          },
+          data: data,
+        };
+
+        try {
+          const response = await axios.request(config);
+          console.log(JSON.stringify(response.data));
+          return response.data;
+        } catch (error) {
+          console.log(error.message);
+          return error.message;
+        }
+      };
+
+      try {
+        if (From > 0 && To > 0) {
+          const jobsPromises = [];
+          for (let i = From; i <= To; i++) {
+            jobsPromises.push(createJob(job + i, project, authToken));
+          }
+
+          const jobResults = await Promise.all(jobsPromises);
+          toast.success("Jobs added successfully");
+        } else {
+          const result = await createJob(job, project, authToken);
+          toast.success("Job added successfully");
+        }
+      } catch (error) {
+        toast.error(`Error: ${error.message}`);
+      }
     } catch (error) {
       toast.error(`Error: ${error.message}`);
       setShowLoader(false);
@@ -115,7 +193,7 @@ const AddJobs = () => {
               }}
             />
           </div>
-{/*           <div className="mb-4">
+          <div className="mb-4">
             <label
               htmlFor="client"
               className="block text-sm font-medium text-gray-600"
@@ -132,7 +210,7 @@ const AddJobs = () => {
                 setClientID(e.target.value);
               }}
             />
-          </div> */}
+          </div>
           <div className="my-4">
             <label
               htmlFor="project"
@@ -256,6 +334,14 @@ const AddJobs = () => {
           </button>
         </form>
       </div>
+      <button
+        type="submit"
+        className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 flex items-center gap-2"
+        onClick={addJobDirect}
+      >
+        Submit to add Jobs Directly
+        {showLoader && <Loader />}{" "}
+      </button>
     </>
   );
 };
