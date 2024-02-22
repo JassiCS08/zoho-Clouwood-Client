@@ -115,7 +115,7 @@ const AddJobs = () => {
               }}
             />
           </div>
-          <div className="mb-4">
+{/*           <div className="mb-4">
             <label
               htmlFor="client"
               className="block text-sm font-medium text-gray-600"
@@ -132,7 +132,7 @@ const AddJobs = () => {
                 setClientID(e.target.value);
               }}
             />
-          </div>
+          </div> */}
           <div className="my-4">
             <label
               htmlFor="project"
