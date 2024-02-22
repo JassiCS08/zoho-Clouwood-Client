@@ -8,7 +8,7 @@ const Passcode = ({ children }) => {
   const handlePasswordSubmit = (e) => {
     e.preventDefault();
 
-    const storedPassword = "ABC@123";
+    const storedPassword = "Clouwood@00$";
     const enteredPasswordHash = MD5(password.trim()).toString();
     const storedPasswordHash = MD5(storedPassword.trim()).toString();
 
