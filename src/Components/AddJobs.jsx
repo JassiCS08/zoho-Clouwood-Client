@@ -73,8 +73,8 @@ const AddJobs = () => {
       }
 
       const apiUrl = multipleJobs
-        ? `http://localhost:5000/addjobs?Job_Name=${job}&Project=${project}&ProjectDepartmentIds=${departmentIds}&From=${rangeFrom}&To=${rangeTo}`
-        : `http://localhost:5000/addjobs?Job_Name=${job}&Project=${project}&ProjectDepartmentIds=${departmentIds}`;
+        ? `https://zoho-clouwood-backend.onrender.com/addjobs?Job_Name=${job}&Project=${project}&ProjectDepartmentIds=${departmentIds}&From=${rangeFrom}&To=${rangeTo}`
+        : `https://zoho-clouwood-backend.onrender.com/addjobs?Job_Name=${job}&Project=${project}&ProjectDepartmentIds=${departmentIds}`;
 
       const response = await axios.post(apiUrl, null, {
         headers: {
